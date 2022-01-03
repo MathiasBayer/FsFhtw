@@ -55,7 +55,7 @@ let (|EmptyWarehouse|AddMaterial|DeleteMaterial|AddConsumer|DeleteConsumer|Help|
     | [ verb ] when safeEquals verb HelpLabel -> Help
     | _ -> ParseFailed
 
-let (|AddConsumption|ParseFailed|) (input: string) =
+let (|AddConsumption|InitWarehouse|ParseFailed|) (input: string) =
     let tryParseInt (arg: string) valueConstructor =
         let (worked, arg') = Int32.TryParse arg
 
@@ -76,4 +76,5 @@ let (|AddConsumption|ParseFailed|) (input: string) =
 
     match parts with
     | [ verb; consumer; material; amount; ] when safeEquals verb (nameof Domain.AddConsumption) -> tryParseInt amount (fun a ->  AddConsumption (consumer , material, a))
+    | [ verb ] when safeEquals verb (nameof Domain.InitWarehouse) -> InitWarehouse
     | _ -> ParseFailed

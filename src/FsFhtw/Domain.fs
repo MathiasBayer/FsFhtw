@@ -34,6 +34,7 @@ type Message =
     | AddConsumer of Consumer
     | DeleteConsumer of Consumer
     | AddConsumption of string * string * int
+    | InitWarehouse
 
 type WarehouseApi =
     { add: AddMaterial
@@ -41,4 +42,5 @@ type WarehouseApi =
       addConsumer: AddConsumer
       deleteConsumer: DeleteConsumer
       addConsumption: AddConsumption
-      empty: Warehouse }
+      empty: Warehouse
+      init: Warehouse }
