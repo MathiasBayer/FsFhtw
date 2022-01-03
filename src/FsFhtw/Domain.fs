@@ -1,19 +1,22 @@
 module Domain
 
-type State = int
+type Material =
+    { Name: string
+      Price: double
+      Weight: double
+      Stock: int
+      ReportingStock: int }
+
+type Warehouse = { Materials : list<Material> }
+
+type AddMaterial = Warehouse -> Material -> Warehouse
 
 type Message =
-    | Increment
-    | Decrement
-    | IncrementBy of int
-    | DecrementBy of int
+    | EmptyWarehouse
 
-let init () : State =
-    0
+type WarehouseApi  =
+    {
+        add: AddMaterial
+        empty: Warehouse
+    }
 
-let update (msg : Message) (model : State) : State =
-    match msg with
-    | Increment -> model + 1
-    | Decrement -> model - 1
-    | IncrementBy x -> model + x
-    | DecrementBy x -> model - x

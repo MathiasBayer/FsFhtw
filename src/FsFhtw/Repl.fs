@@ -8,14 +8,11 @@ type Message =
     | HelpRequested
     | NotParsable of string
 
-type State = Domain.State
+type Warehouse = Domain.Warehouse
 
 let read (input : string) =
     match input with
-    | Increment -> Domain.Increment |> DomainMessage
-    | Decrement -> Domain.Decrement |> DomainMessage
-    | IncrementBy v -> Domain.IncrementBy v |> DomainMessage
-    | DecrementBy v -> Domain.DecrementBy v |> DomainMessage
+    | EmptyWarehouse -> Domain.EmptyWarehouse |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed  -> NotParsable input
 
@@ -27,29 +24,29 @@ let createHelpText () : string =
     |> Array.fold (fun prev curr -> prev + " " + curr) ""
     |> (fun s -> s.Trim() |> sprintf "Known commands are: %s")
 
-let evaluate (update : Domain.Message -> State -> State) (state : State) (msg : Message) =
+let evaluate (update : Domain.Message -> Warehouse -> Warehouse) (warehouse : Warehouse) (msg : Message) =
     match msg with
     | DomainMessage msg ->
-        let newState = update msg state
-        let message = sprintf "The message was %A. New state is %A" msg newState
-        (newState, message)
+        let newWarehouse = update msg warehouse
+        let message = sprintf "The message was %A. New warehouse is %A" msg newWarehouse
+        (newWarehouse, message)
     | HelpRequested ->
         let message = createHelpText ()
-        (state, message)
+        (warehouse, message)
     | NotParsable originalInput ->
         let message =
             sprintf """"%s" was not parsable. %s"""  originalInput "You can get information about known commands by typing \"Help\""
-        (state, message)
+        (warehouse, message)
 
-let print (state : State, outputToPrint : string) =
+let print (warehouse : Warehouse, outputToPrint : string) =
     printfn "%s\n" outputToPrint
     printf "> "
 
-    state
+    warehouse
 
-let rec loop (state : State) =
+let rec loop (warehouse : Warehouse) =
     Console.ReadLine()
     |> read
-    |> evaluate Domain.update state
+    |> evaluate WarehouseImplementation.update warehouse
     |> print
     |> loop
