@@ -25,6 +25,7 @@ type Warehouse =
 
 type ConsumptionFailures =
     | MaterialNotFoundFailure
+    | NotEnoughMaterialInStockFailure
 
 type OperationResult =
     | Warehouse of Warehouse

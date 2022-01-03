@@ -2,7 +2,6 @@ module Repl
 
 open System
 open Parser
-open Domain
 
 type Message =
     | DomainMessage of Domain.Message
@@ -32,7 +31,7 @@ let createHelpText () : string =
     |> Array.fold (fun prev curr -> prev + " " + curr) ""
     |> (fun s -> s.Trim() |> sprintf "Known commands are: %s")
 
-let evaluate (update : Domain.Message -> Warehouse -> OperationResult) (warehouse : Warehouse) (msg : Message) =
+let evaluate (update : Domain.Message -> Warehouse -> Domain.OperationResult) (warehouse : Warehouse) (msg : Message) =
     match msg with
     | DomainMessage msg ->
         let newWarehouse = update msg warehouse
@@ -40,22 +39,25 @@ let evaluate (update : Domain.Message -> Warehouse -> OperationResult) (warehous
         (newWarehouse, warehouse, message)
     | HelpRequested ->
         let message = createHelpText ()
-        (Warehouse warehouse, warehouse, message)
+        (Domain.Warehouse warehouse, warehouse, message)
     | NotParsable originalInput ->
         let message =
             sprintf """"%s" was not parsable. %s"""  originalInput "You can get information about known commands by typing \"Help\""
-        (Warehouse warehouse, warehouse, message)
+        (Domain.Warehouse warehouse, warehouse, message)
 
-let print (warehouse : OperationResult, oldWarehouse: Warehouse, outputToPrint : string) =
+let print (warehouse : Domain.OperationResult, oldWarehouse: Warehouse, outputToPrint : string) =
     match warehouse with
     | Domain.Warehouse w ->
         printfn "%s\n" outputToPrint
         printf "> "
         w
-    | ConsumptionFailures f -> match f with
-                               | MaterialNotFoundFailure -> printfn "Material not found"
-                                                            printf "> "
-                                                            oldWarehouse
+    | Domain.ConsumptionFailures f -> match f with
+                                      | Domain.MaterialNotFoundFailure -> printfn "Material not found"
+                                                                          printf "> "
+                                                                          oldWarehouse
+                                      | Domain.NotEnoughMaterialInStockFailure -> printfn "Not enough material in stock"
+                                                                                  printf "> "
+                                                                                  oldWarehouse
 
 let rec loop (warehouse : Warehouse) =
     Console.ReadLine()
