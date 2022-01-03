@@ -4,11 +4,15 @@ open Domain
 let private addMaterial { Materials = materialsInWarehouse } material =
     { Materials = material :: materialsInWarehouse }
 
+let private deleteMaterial { Materials = materialsInWarehouse } name =
+    { Materials = materialsInWarehouse |> List.filter(fun material -> not <| material.Name.Equals(name)) }
+
 let private emptyWarehosue = { Materials = [] }
 
 
 let warehouseApi : WarehouseApi = {
     add = addMaterial
+    delete = deleteMaterial
     empty = emptyWarehosue
 }
 
@@ -16,6 +20,9 @@ let warehouseApi : WarehouseApi = {
 let update (msg : Message) (model : Warehouse) : Warehouse =
     match msg with
     | EmptyWarehouse -> warehouseApi.empty
+    | AddMaterial material -> warehouseApi.add model material
+    | DeleteMaterial name -> warehouseApi.delete model name
+
 //let private init () : Warehouse =
 //    { Materials = [ { Name = "Test"
 //        Price = 1

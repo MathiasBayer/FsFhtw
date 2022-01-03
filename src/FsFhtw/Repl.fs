@@ -13,6 +13,8 @@ type Warehouse = Domain.Warehouse
 let read (input : string) =
     match input with
     | EmptyWarehouse -> Domain.EmptyWarehouse |> DomainMessage
+    | AddMaterial v -> Domain.AddMaterial v |> DomainMessage
+    | DeleteMaterial name -> Domain.DeleteMaterial name |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed  -> NotParsable input
 
