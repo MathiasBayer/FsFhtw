@@ -1,6 +1,7 @@
 module WarehouseImplementation
 
 open Domain
+open System
 
 let private addMaterial
     { Materials = materialsInWarehouse
@@ -61,7 +62,8 @@ let private addConsumption
     let updatedMaterial = { mat with Stock = mat.Stock - amount }
 
     let consumption =
-        { Consumer = { Name = consumer }
+        { Id = Guid.NewGuid()
+          Consumer = { Name = consumer }
           MaterialName = mat.Name
           Amount = amount
           Price = calculatePrice (mat.Price, amount) }
@@ -71,6 +73,25 @@ let private addConsumption
           |> List.filter (fun material -> not <| material.Equals(mat))
       Consumers = consumersInWarehouse
       Consumptions = consumption :: consumptionsInWarehouse }
+
+let private deleteConsumption
+    { Materials = materialsInWarehouse
+      Consumers = consumersInWarehouse
+      Consumptions = consumptionsInWarehouse }
+    guid
+    =
+    let consumption = consumptionsInWarehouse |> List.find(fun c -> c.Id.Equals(guid))
+    let mat =
+        materialsInWarehouse
+        |> List.find (fun m -> m.Name.Equals(consumption.MaterialName))
+
+    let updatedMaterial = { mat with Stock = mat.Stock + consumption.Amount }
+
+    { Materials =
+          updatedMaterial :: materialsInWarehouse
+          |> List.filter (fun material -> not <| material.Equals(mat))
+      Consumers = consumersInWarehouse
+      Consumptions = consumptionsInWarehouse |> List.filter (fun c -> not <| c.Equals(consumption)) }
 
 
 let private emptyWarehosue =
@@ -94,7 +115,8 @@ let private initWarehouse : Warehouse =
           [ { Name = "Mathias" }
             { Name = "Reinhard" } ]
       Consumptions =
-          [ { Consumer = { Name = "Mathias" }
+          [ { Id = Guid.NewGuid()
+              Consumer = { Name = "Mathias" }
               MaterialName = "Test"
               Amount = 4
               Price = 4 } ] }
@@ -106,6 +128,7 @@ let warehouseApi: WarehouseApi =
       addConsumer = addConsumer
       deleteConsumer = deleteConsumer
       addConsumption = addConsumption
+      deleteConsumption = deleteConsumption
       empty = emptyWarehosue
       init = initWarehouse }
 
@@ -118,4 +141,5 @@ let update (msg: Message) (model: Warehouse) : Warehouse =
     | AddConsumer consumer -> warehouseApi.addConsumer model consumer
     | DeleteConsumer consumer -> warehouseApi.deleteConsumer model consumer
     | AddConsumption (consumer, material, amount) -> warehouseApi.addConsumption model (consumer, material, amount)
+    | DeleteConsumption guid -> warehouseApi.deleteConsumption model guid
     | InitWarehouse -> warehouseApi.init

@@ -1,4 +1,5 @@
 module Domain
+open System
 
 type Material =
     { Name: string
@@ -10,7 +11,8 @@ type Material =
 type Consumer = { Name: string }
 
 type Consumption =
-    { Consumer: Consumer
+    { Id: Guid
+      Consumer: Consumer
       MaterialName: string
       Amount: int
       Price: float }
@@ -26,6 +28,7 @@ type AddConsumer = Warehouse -> Consumer -> Warehouse
 type DeleteMaterial = Warehouse -> string -> Warehouse
 type DeleteConsumer = Warehouse -> Consumer -> Warehouse
 type AddConsumption = Warehouse -> string * string * int -> Warehouse
+type DeleteConsumption = Warehouse -> Guid -> Warehouse
 
 type Message =
     | EmptyWarehouse
@@ -34,6 +37,7 @@ type Message =
     | AddConsumer of Consumer
     | DeleteConsumer of Consumer
     | AddConsumption of string * string * int
+    | DeleteConsumption of Guid
     | InitWarehouse
 
 type WarehouseApi =
@@ -42,5 +46,6 @@ type WarehouseApi =
       addConsumer: AddConsumer
       deleteConsumer: DeleteConsumer
       addConsumption: AddConsumption
+      deleteConsumption: DeleteConsumption
       empty: Warehouse
       init: Warehouse }
