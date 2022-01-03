@@ -17,6 +17,7 @@ let read (input : string) =
     | AddConsumer consumer -> Domain.AddConsumer consumer |> DomainMessage
     | DeleteMaterial name -> Domain.DeleteMaterial name |> DomainMessage
     | DeleteConsumer name -> Domain.DeleteConsumer name |> DomainMessage
+    | AddConsumption v -> Domain.AddConsumption v |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed  -> NotParsable input
 

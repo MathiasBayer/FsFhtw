@@ -54,3 +54,26 @@ let (|EmptyWarehouse|AddMaterial|DeleteMaterial|AddConsumer|DeleteConsumer|Help|
     | [ verb; name; ] when safeEquals verb (nameof Domain.DeleteConsumer) -> DeleteConsumer { Name = name }
     | [ verb ] when safeEquals verb HelpLabel -> Help
     | _ -> ParseFailed
+
+let (|AddConsumption|ParseFailed|) (input: string) =
+    let tryParseInt (arg: string) valueConstructor =
+        let (worked, arg') = Int32.TryParse arg
+
+        if worked then
+            valueConstructor arg'
+        else
+            ParseFailed
+
+    let tryParseDouble (arg: string) valueConstructor =
+        let (worked, arg') = Double.TryParse arg
+
+        if worked then
+            valueConstructor arg'
+        else
+            ParseFailed
+
+    let parts = input.Split(' ') |> List.ofArray
+
+    match parts with
+    | [ verb; consumer; material; amount; ] when safeEquals verb (nameof Domain.AddConsumption) -> tryParseInt amount (fun a ->  AddConsumption (consumer , material, a))
+    | _ -> ParseFailed

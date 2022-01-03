@@ -25,6 +25,7 @@ type AddMaterial = Warehouse -> Material -> Warehouse
 type AddConsumer = Warehouse -> Consumer -> Warehouse
 type DeleteMaterial = Warehouse -> string -> Warehouse
 type DeleteConsumer = Warehouse -> Consumer -> Warehouse
+type AddConsumption = Warehouse -> string * string * int -> Warehouse
 
 type Message =
     | EmptyWarehouse
@@ -32,10 +33,12 @@ type Message =
     | DeleteMaterial of string
     | AddConsumer of Consumer
     | DeleteConsumer of Consumer
+    | AddConsumption of string * string * int
 
 type WarehouseApi =
     { add: AddMaterial
       delete: DeleteMaterial
       addConsumer: AddConsumer
       deleteConsumer: DeleteConsumer
+      addConsumption: AddConsumption
       empty: Warehouse }
