@@ -14,7 +14,9 @@ let read (input : string) =
     match input with
     | EmptyWarehouse -> Domain.EmptyWarehouse |> DomainMessage
     | AddMaterial v -> Domain.AddMaterial v |> DomainMessage
+    | AddConsumer consumer -> Domain.AddConsumer consumer |> DomainMessage
     | DeleteMaterial name -> Domain.DeleteMaterial name |> DomainMessage
+    | DeleteConsumer name -> Domain.DeleteConsumer name |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed  -> NotParsable input
 
