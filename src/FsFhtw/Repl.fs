@@ -2,6 +2,7 @@ module Repl
 
 open System
 open Parser
+open Domain
 
 type Message =
     | DomainMessage of Domain.Message
@@ -31,25 +32,30 @@ let createHelpText () : string =
     |> Array.fold (fun prev curr -> prev + " " + curr) ""
     |> (fun s -> s.Trim() |> sprintf "Known commands are: %s")
 
-let evaluate (update : Domain.Message -> Warehouse -> Warehouse) (warehouse : Warehouse) (msg : Message) =
+let evaluate (update : Domain.Message -> Warehouse -> OperationResult) (warehouse : Warehouse) (msg : Message) =
     match msg with
     | DomainMessage msg ->
         let newWarehouse = update msg warehouse
         let message = sprintf "The message was %A. New warehouse is %A" msg newWarehouse
-        (newWarehouse, message)
+        (newWarehouse, warehouse, message)
     | HelpRequested ->
         let message = createHelpText ()
-        (warehouse, message)
+        (Warehouse warehouse, warehouse, message)
     | NotParsable originalInput ->
         let message =
             sprintf """"%s" was not parsable. %s"""  originalInput "You can get information about known commands by typing \"Help\""
-        (warehouse, message)
+        (Warehouse warehouse, warehouse, message)
 
-let print (warehouse : Warehouse, outputToPrint : string) =
-    printfn "%s\n" outputToPrint
-    printf "> "
-
-    warehouse
+let print (warehouse : OperationResult, oldWarehouse: Warehouse, outputToPrint : string) =
+    match warehouse with
+    | Domain.Warehouse w ->
+        printfn "%s\n" outputToPrint
+        printf "> "
+        w
+    | ConsumptionFailures f -> match f with
+                               | MaterialNotFoundFailure -> printfn "Material not found"
+                                                            printf "> "
+                                                            oldWarehouse
 
 let rec loop (warehouse : Warehouse) =
     Console.ReadLine()

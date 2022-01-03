@@ -9,9 +9,10 @@ let private addMaterial
       Consumptions = consumptionsInWarehouse }
     material
     =
-    { Materials = material :: materialsInWarehouse
-      Consumers = consumersInWarehouse
-      Consumptions = consumptionsInWarehouse }
+    Warehouse
+        { Materials = material :: materialsInWarehouse
+          Consumers = consumersInWarehouse
+          Consumptions = consumptionsInWarehouse }
 
 let private addConsumer
     { Materials = materialsInWarehouse
@@ -19,9 +20,10 @@ let private addConsumer
       Consumptions = consumptionsInWarehouse }
     consumer
     =
-    { Materials = materialsInWarehouse
-      Consumers = consumer :: consumersInWarehouse
-      Consumptions = consumptionsInWarehouse }
+    Warehouse
+        { Materials = materialsInWarehouse
+          Consumers = consumer :: consumersInWarehouse
+          Consumptions = consumptionsInWarehouse }
 
 let private deleteMaterial
     { Materials = materialsInWarehouse
@@ -29,11 +31,12 @@ let private deleteMaterial
       Consumptions = consumptionsInWarehouse }
     name
     =
-    { Materials =
-          materialsInWarehouse
-          |> List.filter (fun material -> not <| material.Name.Equals(name))
-      Consumers = consumersInWarehouse
-      Consumptions = consumptionsInWarehouse }
+    Warehouse
+        { Materials =
+              materialsInWarehouse
+              |> List.filter (fun material -> not <| material.Name.Equals(name))
+          Consumers = consumersInWarehouse
+          Consumptions = consumptionsInWarehouse }
 
 let private deleteConsumer
     { Materials = materialsInWarehouse
@@ -41,11 +44,12 @@ let private deleteConsumer
       Consumptions = consumptionsInWarehouse }
     consumer
     =
-    { Materials = materialsInWarehouse
-      Consumers =
-          consumersInWarehouse
-          |> List.filter (fun c -> not <| c.Equals(consumer))
-      Consumptions = consumptionsInWarehouse }
+    Warehouse
+        { Materials = materialsInWarehouse
+          Consumers =
+              consumersInWarehouse
+              |> List.filter (fun c -> not <| c.Equals(consumer))
+          Consumptions = consumptionsInWarehouse }
 
 let private calculatePrice (price: float, amount: int) = price * float amount
 
@@ -68,11 +72,12 @@ let private addConsumption
           Amount = amount
           Price = calculatePrice (mat.Price, amount) }
 
-    { Materials =
-          updatedMaterial :: materialsInWarehouse
-          |> List.filter (fun material -> not <| material.Equals(mat))
-      Consumers = consumersInWarehouse
-      Consumptions = consumption :: consumptionsInWarehouse }
+    Warehouse
+        { Materials =
+              updatedMaterial :: materialsInWarehouse
+              |> List.filter (fun material -> not <| material.Equals(mat))
+          Consumers = consumersInWarehouse
+          Consumptions = consumption :: consumptionsInWarehouse }
 
 let private deleteConsumption
     { Materials = materialsInWarehouse
@@ -80,46 +85,56 @@ let private deleteConsumption
       Consumptions = consumptionsInWarehouse }
     guid
     =
-    let consumption = consumptionsInWarehouse |> List.find(fun c -> c.Id.Equals(guid))
+    let consumption =
+        consumptionsInWarehouse
+        |> List.find (fun c -> c.Id.Equals(guid))
+
     let mat =
         materialsInWarehouse
         |> List.find (fun m -> m.Name.Equals(consumption.MaterialName))
 
-    let updatedMaterial = { mat with Stock = mat.Stock + consumption.Amount }
+    let updatedMaterial =
+        { mat with
+              Stock = mat.Stock + consumption.Amount }
 
-    { Materials =
-          updatedMaterial :: materialsInWarehouse
-          |> List.filter (fun material -> not <| material.Equals(mat))
-      Consumers = consumersInWarehouse
-      Consumptions = consumptionsInWarehouse |> List.filter (fun c -> not <| c.Equals(consumption)) }
+    Warehouse
+        { Materials =
+              updatedMaterial :: materialsInWarehouse
+              |> List.filter (fun material -> not <| material.Equals(mat))
+          Consumers = consumersInWarehouse
+          Consumptions =
+              consumptionsInWarehouse
+              |> List.filter (fun c -> not <| c.Equals(consumption)) }
 
 
 let private emptyWarehosue =
-    { Materials = []
-      Consumers = []
-      Consumptions = [] }
+    Warehouse
+        { Materials = []
+          Consumers = []
+          Consumptions = [] }
 
-let private initWarehouse : Warehouse =
-    { Materials =
-          [ { Name = "Test"
-              Price = 1
-              Weight = 1
-              Stock = 10
-              ReportingStock = 0 }
-            { Name = "Test2"
-              Price = 1
-              Weight = 1
-              Stock = 10
-              ReportingStock = 0 } ]
-      Consumers =
-          [ { Name = "Mathias" }
-            { Name = "Reinhard" } ]
-      Consumptions =
-          [ { Id = Guid.NewGuid()
-              Consumer = { Name = "Mathias" }
-              MaterialName = "Test"
-              Amount = 4
-              Price = 4 } ] }
+let private initWarehouse =
+    Warehouse
+        { Materials =
+              [ { Name = "Test"
+                  Price = 1
+                  Weight = 1
+                  Stock = 10
+                  ReportingStock = 0 }
+                { Name = "Test2"
+                  Price = 1
+                  Weight = 1
+                  Stock = 10
+                  ReportingStock = 0 } ]
+          Consumers =
+              [ { Name = "Mathias" }
+                { Name = "Reinhard" } ]
+          Consumptions =
+              [ { Id = Guid.NewGuid()
+                  Consumer = { Name = "Mathias" }
+                  MaterialName = "Test"
+                  Amount = 4
+                  Price = 4 } ] }
 
 
 let warehouseApi: WarehouseApi =
@@ -133,7 +148,7 @@ let warehouseApi: WarehouseApi =
       init = initWarehouse }
 
 
-let update (msg: Message) (model: Warehouse) : Warehouse =
+let update (msg: Message) (model: Warehouse) : OperationResult =
     match msg with
     | EmptyWarehouse -> warehouseApi.empty
     | AddMaterial material -> warehouseApi.add model material

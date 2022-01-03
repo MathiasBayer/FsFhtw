@@ -23,12 +23,19 @@ type Warehouse =
       Consumers: list<Consumer>
       Consumptions: list<Consumption> }
 
-type AddMaterial = Warehouse -> Material -> Warehouse
-type AddConsumer = Warehouse -> Consumer -> Warehouse
-type DeleteMaterial = Warehouse -> string -> Warehouse
-type DeleteConsumer = Warehouse -> Consumer -> Warehouse
-type AddConsumption = Warehouse -> string * string * int -> Warehouse
-type DeleteConsumption = Warehouse -> Guid -> Warehouse
+type ConsumptionFailures =
+    | MaterialNotFoundFailure
+
+type OperationResult =
+    | Warehouse of Warehouse
+    | ConsumptionFailures of ConsumptionFailures
+
+type AddMaterial = Warehouse -> Material -> OperationResult
+type AddConsumer = Warehouse -> Consumer -> OperationResult
+type DeleteMaterial = Warehouse -> string -> OperationResult
+type DeleteConsumer = Warehouse -> Consumer -> OperationResult
+type AddConsumption = Warehouse -> string * string * int -> OperationResult
+type DeleteConsumption = Warehouse -> Guid -> OperationResult
 
 type Message =
     | EmptyWarehouse
@@ -47,5 +54,5 @@ type WarehouseApi =
       deleteConsumer: DeleteConsumer
       addConsumption: AddConsumption
       deleteConsumption: DeleteConsumption
-      empty: Warehouse
-      init: Warehouse }
+      empty: OperationResult
+      init: OperationResult }

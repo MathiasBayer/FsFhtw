@@ -6,5 +6,7 @@ let main argv =
     printf "> "
 
     let initialState = WarehouseImplementation.warehouseApi.empty
-    Repl.loop initialState
+    let warehouse = match initialState with
+                    | Domain.Warehouse w ->  w
+    Repl.loop warehouse
     0 // return an integer exit code
