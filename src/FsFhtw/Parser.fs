@@ -82,3 +82,27 @@ let (|AddConsumption|InitWarehouse|DeleteConsumption|UpdatePrice|GetBelowReporti
     | [ verb; ] when safeEquals verb (nameof Domain.GetBelowReportingStock) -> GetBelowReportingStock
     | [ verb; ] when safeEquals verb (nameof Domain.GetWarehouse) -> GetWarehouse
     | _ -> ParseFailed
+
+
+let (|UpdateStock|ParseFailed|) (input: string) =
+    let tryParseInt (arg: string) valueConstructor =
+        let (worked, arg') = Int32.TryParse arg
+
+        if worked then
+            valueConstructor arg'
+        else
+            ParseFailed
+
+    let tryParseDouble (arg: string) valueConstructor =
+        let (worked, arg') = Double.TryParse arg
+
+        if worked then
+            valueConstructor arg'
+        else
+            ParseFailed
+
+    let parts = input.Split(' ') |> List.ofArray
+
+    match parts with
+    | [ verb; name; stock ] when safeEquals verb (nameof Domain.UpdateStock) -> tryParseInt stock (fun s -> UpdateStock {MaterialName = name; Stock = s})
+    | _ -> ParseFailed

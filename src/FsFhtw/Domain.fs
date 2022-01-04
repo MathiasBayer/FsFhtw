@@ -26,6 +26,10 @@ type UpdatePriceRequest =
     { MaterialName: string
       Price: float }
 
+type UpdateStockRequest =
+    { MaterialName: string
+      Stock: int }
+
 type Warehouse =
     { Materials: list<Material>
       Consumers: list<Consumer>
@@ -47,6 +51,7 @@ type DeleteConsumer = Warehouse -> Consumer -> OperationResult
 type AddConsumption = Warehouse -> ConsumptionRequest -> OperationResult
 type DeleteConsumption = Warehouse -> Guid -> OperationResult
 type UpdatePrice = Warehouse -> UpdatePriceRequest -> OperationResult
+type UpdateStock = Warehouse -> UpdateStockRequest -> OperationResult
 type GetBelowReportingStock = Warehouse -> OperationResult
 type GetWarehouse = Warehouse -> OperationResult
 
@@ -60,6 +65,7 @@ type Message =
     | DeleteConsumption of Guid
     | InitWarehouse
     | UpdatePrice of UpdatePriceRequest
+    | UpdateStock of UpdateStockRequest
     | GetBelowReportingStock
     | GetWarehouse
 
@@ -71,6 +77,7 @@ type WarehouseApi =
       addConsumption: AddConsumption
       deleteConsumption: DeleteConsumption
       updatePrice: UpdatePrice
+      updateStock: UpdateStock
       getBelowReportingStock: GetBelowReportingStock
       getWarehouse: GetWarehouse
       empty: OperationResult

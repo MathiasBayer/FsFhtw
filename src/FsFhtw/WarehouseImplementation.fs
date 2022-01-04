@@ -161,6 +161,28 @@ let private updatePrice
               Consumers = consumersInWarehouse
               Consumptions = consumptionsInWarehouse }
 
+let private updateStock
+    { Materials = materialsInWarehouse
+      Consumers = consumersInWarehouse
+      Consumptions = consumptionsInWarehouse }
+    request
+    =
+    let mat =
+        materialsInWarehouse
+        |> List.tryFind (fun m -> m.Name.Equals(request.MaterialName))
+
+    match mat with
+    | None -> ConsumptionFailures(MaterialNotFoundFailure("Material " + request.MaterialName + " not found."))
+    | Some material ->
+        let updatedMaterial = { material with Stock = request.Stock + material.Stock}
+
+        Warehouse
+            { Materials =
+                  updatedMaterial :: materialsInWarehouse
+                  |> List.filter (fun mat -> not <| material.Equals(mat))
+              Consumers = consumersInWarehouse
+              Consumptions = consumptionsInWarehouse }
+
 let private getBelowReportingStock
     { Materials = materialsInWarehouse
       Consumers = consumersInWarehouse
@@ -223,6 +245,7 @@ let warehouseApi: WarehouseApi =
       addConsumption = addConsumption
       deleteConsumption = deleteConsumption
       updatePrice = updatePrice
+      updateStock = updateStock
       getBelowReportingStock = getBelowReportingStock
       getWarehouse = getWarehouse
       empty = emptyWarehosue
@@ -239,6 +262,7 @@ let update (msg: Message) (model: Warehouse) : OperationResult =
     | AddConsumption request -> warehouseApi.addConsumption model request
     | DeleteConsumption guid -> warehouseApi.deleteConsumption model guid
     | UpdatePrice request -> warehouseApi.updatePrice model request
+    | UpdateStock request -> warehouseApi.updateStock model request
     | GetBelowReportingStock -> warehouseApi.getBelowReportingStock model
     | GetWarehouse -> warehouseApi.getWarehouse model
     | InitWarehouse -> warehouseApi.init

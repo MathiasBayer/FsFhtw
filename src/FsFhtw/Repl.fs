@@ -20,6 +20,7 @@ let read (input : string) =
     | AddConsumption v -> Domain.AddConsumption v |> DomainMessage
     | DeleteConsumption guid -> Domain.DeleteConsumption guid |> DomainMessage
     | UpdatePrice v -> Domain.UpdatePrice v |> DomainMessage
+    | UpdateStock v -> Domain.UpdateStock v |> DomainMessage
     | GetBelowReportingStock -> Domain.GetBelowReportingStock |> DomainMessage
     | GetWarehouse -> Domain.GetWarehouse |> DomainMessage
     | InitWarehouse -> Domain.InitWarehouse |> DomainMessage
