@@ -161,7 +161,17 @@ let private updatePrice
               Consumers = consumersInWarehouse
               Consumptions = consumptionsInWarehouse }
 
-
+let private getBelowReportingStock
+    { Materials = materialsInWarehouse
+      Consumers = consumersInWarehouse
+      Consumptions = consumptionsInWarehouse }
+    =
+    Warehouse
+       { Materials =
+           materialsInWarehouse
+           |> List.filter (fun mat -> mat.Stock < mat.ReportingStock)
+         Consumers = consumersInWarehouse
+         Consumptions = consumptionsInWarehouse } 
 
 
 let private emptyWarehosue =
@@ -202,6 +212,7 @@ let warehouseApi: WarehouseApi =
       addConsumption = addConsumption
       deleteConsumption = deleteConsumption
       updatePrice = updatePrice
+      getBelowReportingStock = getBelowReportingStock
       empty = emptyWarehosue
       init = initWarehouse }
 
@@ -216,4 +227,5 @@ let update (msg: Message) (model: Warehouse) : OperationResult =
     | AddConsumption (consumer, material, amount) -> warehouseApi.addConsumption model (consumer, material, amount)
     | DeleteConsumption guid -> warehouseApi.deleteConsumption model guid
     | UpdatePrice (name, price) -> warehouseApi.updatePrice model (name, price)
+    | GetBelowReportingStock -> warehouseApi.getBelowReportingStock model 
     | InitWarehouse -> warehouseApi.init

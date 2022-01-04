@@ -20,6 +20,7 @@ let read (input : string) =
     | AddConsumption v -> Domain.AddConsumption v |> DomainMessage
     | DeleteConsumption guid -> Domain.DeleteConsumption guid |> DomainMessage
     | UpdatePrice v -> Domain.UpdatePrice v |> DomainMessage
+    | GetBelowReportingStock -> Domain.GetBelowReportingStock |> DomainMessage
     | InitWarehouse -> Domain.InitWarehouse |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed  -> NotParsable input
@@ -32,36 +33,42 @@ let createHelpText () : string =
     |> Array.fold (fun prev curr -> prev + " " + curr) ""
     |> (fun s -> s.Trim() |> sprintf "Known commands are: %s")
 
+
+let private evaluateResult (msg: Domain.Message) (oldWarehouse: Warehouse) (result : Domain.OperationResult) : (Domain.Warehouse * string) =
+    match result with
+    | Domain.Warehouse w ->
+        match msg with
+        | Domain.GetBelowReportingStock -> let message = sprintf "The message was %A. All materials with stock below reporting stock are %A" msg (w.Materials |> List.map (fun m -> m.Name))
+                                           (oldWarehouse, message)
+        | _ -> let message = sprintf "The message was %A. New warehouse is %A" msg w
+               (w, message)
+    | Domain.ConsumptionFailures f -> match f with
+                                        | Domain.MaterialNotFoundFailure message -> (oldWarehouse, message)
+                                        | Domain.NotEnoughMaterialInStockFailure message -> (oldWarehouse, message)
+                                        | Domain.ConsumerNotFoundFailure message -> (oldWarehouse, message)
+
 let evaluate (update : Domain.Message -> Warehouse -> Domain.OperationResult) (warehouse : Warehouse) (msg : Message) =
     match msg with
     | DomainMessage msg ->
-        let newWarehouse = update msg warehouse
-        let message = sprintf "The message was %A. New warehouse is %A" msg newWarehouse
-        (newWarehouse, warehouse, message)
+        let result = update msg warehouse
+        let (warehouse, message) = evaluateResult msg warehouse result
+        (warehouse, message)
     | HelpRequested ->
         let message = createHelpText ()
-        (Domain.Warehouse warehouse, warehouse, message)
+        (warehouse, message)
     | NotParsable originalInput ->
         let message =
             sprintf """"%s" was not parsable. %s"""  originalInput "You can get information about known commands by typing \"Help\""
-        (Domain.Warehouse warehouse, warehouse, message)
+        (warehouse, message)
 
-let print (warehouse : Domain.OperationResult, oldWarehouse: Warehouse, outputToPrint : string) =
-    match warehouse with
-    | Domain.Warehouse w ->
-        printfn "%s\n" outputToPrint
-        printf "> "
-        w
-    | Domain.ConsumptionFailures f -> match f with
-                                      | Domain.MaterialNotFoundFailure message -> printfn "%s" message
-                                                                                  printf "> "
-                                                                                  oldWarehouse
-                                      | Domain.NotEnoughMaterialInStockFailure message -> printfn "%s" message
-                                                                                          printf "> "
-                                                                                          oldWarehouse
-                                      | Domain.ConsumerNotFoundFailure message -> printfn "%s" message
-                                                                                  printf "> "
-                                                                                  oldWarehouse
+
+        
+
+let print (warehouse : Domain.Warehouse, outputToPrint : string) =
+    printfn "%s\n" outputToPrint
+    printf "> "
+    warehouse
+    
 
 let rec loop (warehouse : Warehouse) =
     Console.ReadLine()
