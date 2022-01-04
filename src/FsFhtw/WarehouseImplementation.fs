@@ -66,26 +66,30 @@ let private addConsumption
     match mat with
     | Some material ->
         if material.Stock < amount then
-            ConsumptionFailures NotEnoughMaterialInStockFailure
+            ConsumptionFailures (NotEnoughMaterialInStockFailure("Not enough " + material.Name+ " in stock. Request amount was " + string amount + ". Available amount is " + string material.Stock + "."))
         else
-            let updatedMaterial =
-                { material with
-                      Stock = material.Stock - amount }
+            let con = consumersInWarehouse |> List.tryFind (fun c -> c.Name.Equals(consumer))
+            match con with
+            | Some consumer ->
+                let updatedMaterial =
+                    { material with
+                          Stock = material.Stock - amount }
 
-            let consumption =
-                { Id = Guid.NewGuid()
-                  Consumer = { Name = consumer }
-                  MaterialName = material.Name
-                  Amount = amount
-                  Price = calculatePrice (material.Price, amount) }
+                let consumption =
+                    { Id = Guid.NewGuid()
+                      Consumer = consumer
+                      MaterialName = material.Name
+                      Amount = amount
+                      Price = calculatePrice (material.Price, amount) }
 
-            Warehouse
-                { Materials =
-                      updatedMaterial :: materialsInWarehouse
-                      |> List.filter (fun material -> not <| material.Equals(mat))
-                  Consumers = consumersInWarehouse
-                  Consumptions = consumption :: consumptionsInWarehouse }
-    | None -> ConsumptionFailures MaterialNotFoundFailure
+                Warehouse
+                    { Materials =
+                          updatedMaterial :: materialsInWarehouse
+                          |> List.filter (fun material -> not <| material.Equals(mat))
+                      Consumers = consumersInWarehouse
+                      Consumptions = consumption :: consumptionsInWarehouse }
+            | None -> ConsumptionFailures (ConsumerNotFoundFailure ("Consumer with name \"" + consumer + "\" not found."))
+    | None -> ConsumptionFailures (MaterialNotFoundFailure("Material " + material + " not found."))
 
 let private deleteConsumption
     { Materials = materialsInWarehouse

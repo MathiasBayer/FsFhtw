@@ -24,8 +24,9 @@ type Warehouse =
       Consumptions: list<Consumption> }
 
 type ConsumptionFailures =
-    | MaterialNotFoundFailure
-    | NotEnoughMaterialInStockFailure
+    | MaterialNotFoundFailure of string
+    | NotEnoughMaterialInStockFailure of string
+    | ConsumerNotFoundFailure of string
 
 type OperationResult =
     | Warehouse of Warehouse

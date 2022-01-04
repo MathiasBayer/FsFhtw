@@ -52,10 +52,13 @@ let print (warehouse : Domain.OperationResult, oldWarehouse: Warehouse, outputTo
         printf "> "
         w
     | Domain.ConsumptionFailures f -> match f with
-                                      | Domain.MaterialNotFoundFailure -> printfn "Material not found"
-                                                                          printf "> "
-                                                                          oldWarehouse
-                                      | Domain.NotEnoughMaterialInStockFailure -> printfn "Not enough material in stock"
+                                      | Domain.MaterialNotFoundFailure message -> printfn "%s" message
+                                                                                  printf "> "
+                                                                                  oldWarehouse
+                                      | Domain.NotEnoughMaterialInStockFailure message -> printfn "%s" message
+                                                                                          printf "> "
+                                                                                          oldWarehouse
+                                      | Domain.ConsumerNotFoundFailure message -> printfn "%s" message
                                                                                   printf "> "
                                                                                   oldWarehouse
 
