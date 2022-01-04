@@ -17,6 +17,14 @@ type Consumption =
       Amount: int
       Price: float }
 
+type ConsumptionRequest =
+    { Consumer: string
+      MaterialName: string
+      Amount: int }
+
+type UpdatePriceRequest =
+    { MaterialName: string
+      Price: float }
 
 type Warehouse =
     { Materials: list<Material>
@@ -36,9 +44,9 @@ type AddMaterial = Warehouse -> Material -> OperationResult
 type AddConsumer = Warehouse -> Consumer -> OperationResult
 type DeleteMaterial = Warehouse -> string -> OperationResult
 type DeleteConsumer = Warehouse -> Consumer -> OperationResult
-type AddConsumption = Warehouse -> string * string * int -> OperationResult
+type AddConsumption = Warehouse -> ConsumptionRequest -> OperationResult
 type DeleteConsumption = Warehouse -> Guid -> OperationResult
-type UpdatePrice = Warehouse -> string * float -> OperationResult
+type UpdatePrice = Warehouse -> UpdatePriceRequest -> OperationResult
 type GetBelowReportingStock = Warehouse -> OperationResult
 type GetWarehouse = Warehouse -> OperationResult
 
@@ -48,10 +56,10 @@ type Message =
     | DeleteMaterial of string
     | AddConsumer of Consumer
     | DeleteConsumer of Consumer
-    | AddConsumption of string * string * int
+    | AddConsumption of ConsumptionRequest
     | DeleteConsumption of Guid
     | InitWarehouse
-    | UpdatePrice of string * float
+    | UpdatePrice of UpdatePriceRequest
     | GetBelowReportingStock
     | GetWarehouse
 

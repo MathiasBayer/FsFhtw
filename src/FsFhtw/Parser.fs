@@ -75,10 +75,10 @@ let (|AddConsumption|InitWarehouse|DeleteConsumption|UpdatePrice|GetBelowReporti
     let parts = input.Split(' ') |> List.ofArray
 
     match parts with
-    | [ verb; consumer; material; amount; ] when safeEquals verb (nameof Domain.AddConsumption) -> tryParseInt amount (fun a ->  AddConsumption (consumer , material, a))
+    | [ verb; consumer; material; amount; ] when safeEquals verb (nameof Domain.AddConsumption) -> tryParseInt amount (fun a ->  AddConsumption {Consumer = consumer; MaterialName = material; Amount = a})
     | [ verb ] when safeEquals verb (nameof Domain.InitWarehouse) -> InitWarehouse
     | [ verb; guid ] when safeEquals verb (nameof Domain.DeleteConsumption) -> DeleteConsumption (Guid.Parse guid)
-    | [ verb; name; price ] when safeEquals verb (nameof Domain.UpdatePrice) -> tryParseDouble price (fun p -> UpdatePrice (name, p))
+    | [ verb; name; price ] when safeEquals verb (nameof Domain.UpdatePrice) -> tryParseDouble price (fun p -> UpdatePrice {MaterialName = name; Price = p})
     | [ verb; ] when safeEquals verb (nameof Domain.GetBelowReportingStock) -> GetBelowReportingStock
     | [ verb; ] when safeEquals verb (nameof Domain.GetWarehouse) -> GetWarehouse
     | _ -> ParseFailed

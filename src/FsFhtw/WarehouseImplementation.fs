@@ -57,21 +57,21 @@ let private addConsumption
     { Materials = materialsInWarehouse
       Consumers = consumersInWarehouse
       Consumptions = consumptionsInWarehouse }
-    (consumer, material, amount)
+    (request:ConsumptionRequest)
     =
     let mat =
         materialsInWarehouse
-        |> List.tryFind (fun m -> m.Name.Equals(material))
+        |> List.tryFind (fun m -> m.Name.Equals(request.MaterialName))
 
     match mat with
     | Some material ->
-        if material.Stock < amount then
+        if material.Stock < request.Amount then
             ConsumptionFailures(
                 NotEnoughMaterialInStockFailure(
                     "Not enough "
                     + material.Name
                     + " in stock. Request amount was "
-                    + string amount
+                    + string request.Amount
                     + ". Available amount is "
                     + string material.Stock
                     + "."
@@ -80,36 +80,36 @@ let private addConsumption
         else
             let con =
                 consumersInWarehouse
-                |> List.tryFind (fun c -> c.Name.Equals(consumer))
+                |> List.tryFind (fun c -> c.Name.Equals(request.Consumer))
 
             match con with
             | Some consumer ->
                 let updatedMaterial =
                     { material with
-                          Stock = material.Stock - amount }
+                          Stock = material.Stock - request.Amount }
 
                 let consumption =
                     { Id = Guid.NewGuid()
                       Consumer = consumer
                       MaterialName = material.Name
-                      Amount = amount
-                      Price = calculatePrice (material.Price, amount) }
+                      Amount = request.Amount
+                      Price = calculatePrice (material.Price, request.Amount) }
 
                 Warehouse
                     { Materials =
                           updatedMaterial :: materialsInWarehouse
-                          |> List.filter (fun material -> not <| material.Equals(mat))
+                          |> List.filter (fun mat -> not <| material.Equals(mat))
                       Consumers = consumersInWarehouse
                       Consumptions = consumption :: consumptionsInWarehouse }
             | None ->
                 ConsumptionFailures(
                     ConsumerNotFoundFailure(
                         "Consumer with name \""
-                        + consumer
+                        + request.Consumer
                         + "\" not found."
                     )
                 )
-    | None -> ConsumptionFailures(MaterialNotFoundFailure("Material " + material + " not found."))
+    | None -> ConsumptionFailures(MaterialNotFoundFailure("Material " + request.MaterialName + " not found."))
 
 let private deleteConsumption
     { Materials = materialsInWarehouse
@@ -143,16 +143,16 @@ let private updatePrice
     { Materials = materialsInWarehouse
       Consumers = consumersInWarehouse
       Consumptions = consumptionsInWarehouse }
-    (name, price)
+    (request:UpdatePriceRequest)
     =
     let mat =
         materialsInWarehouse
-        |> List.tryFind (fun m -> m.Name.Equals(name))
+        |> List.tryFind (fun m -> m.Name.Equals(request.MaterialName))
 
     match mat with
-    | None -> ConsumptionFailures(MaterialNotFoundFailure("Material " + name + " not found."))
+    | None -> ConsumptionFailures(MaterialNotFoundFailure("Material " + request.MaterialName + " not found."))
     | Some material ->
-        let updatedMaterial = { material with Price = price }
+        let updatedMaterial = { material with Price = request.Price }
 
         Warehouse
             { Materials =
@@ -236,9 +236,9 @@ let update (msg: Message) (model: Warehouse) : OperationResult =
     | DeleteMaterial name -> warehouseApi.delete model name
     | AddConsumer consumer -> warehouseApi.addConsumer model consumer
     | DeleteConsumer consumer -> warehouseApi.deleteConsumer model consumer
-    | AddConsumption (consumer, material, amount) -> warehouseApi.addConsumption model (consumer, material, amount)
+    | AddConsumption request -> warehouseApi.addConsumption model request
     | DeleteConsumption guid -> warehouseApi.deleteConsumption model guid
-    | UpdatePrice (name, price) -> warehouseApi.updatePrice model (name, price)
+    | UpdatePrice request -> warehouseApi.updatePrice model request
     | GetBelowReportingStock -> warehouseApi.getBelowReportingStock model
     | GetWarehouse -> warehouseApi.getWarehouse model
     | InitWarehouse -> warehouseApi.init
