@@ -38,6 +38,7 @@ type DeleteMaterial = Warehouse -> string -> OperationResult
 type DeleteConsumer = Warehouse -> Consumer -> OperationResult
 type AddConsumption = Warehouse -> string * string * int -> OperationResult
 type DeleteConsumption = Warehouse -> Guid -> OperationResult
+type UpdatePrice = Warehouse -> string * float -> OperationResult
 
 type Message =
     | EmptyWarehouse
@@ -48,6 +49,7 @@ type Message =
     | AddConsumption of string * string * int
     | DeleteConsumption of Guid
     | InitWarehouse
+    | UpdatePrice of string * float
 
 type WarehouseApi =
     { add: AddMaterial
@@ -56,5 +58,6 @@ type WarehouseApi =
       deleteConsumer: DeleteConsumer
       addConsumption: AddConsumption
       deleteConsumption: DeleteConsumption
+      updatePrice: UpdatePrice
       empty: OperationResult
       init: OperationResult }

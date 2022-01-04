@@ -19,6 +19,7 @@ let read (input : string) =
     | DeleteConsumer name -> Domain.DeleteConsumer name |> DomainMessage
     | AddConsumption v -> Domain.AddConsumption v |> DomainMessage
     | DeleteConsumption guid -> Domain.DeleteConsumption guid |> DomainMessage
+    | UpdatePrice v -> Domain.UpdatePrice v |> DomainMessage
     | InitWarehouse -> Domain.InitWarehouse |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed  -> NotParsable input

@@ -66,9 +66,22 @@ let private addConsumption
     match mat with
     | Some material ->
         if material.Stock < amount then
-            ConsumptionFailures (NotEnoughMaterialInStockFailure("Not enough " + material.Name+ " in stock. Request amount was " + string amount + ". Available amount is " + string material.Stock + "."))
+            ConsumptionFailures(
+                NotEnoughMaterialInStockFailure(
+                    "Not enough "
+                    + material.Name
+                    + " in stock. Request amount was "
+                    + string amount
+                    + ". Available amount is "
+                    + string material.Stock
+                    + "."
+                )
+            )
         else
-            let con = consumersInWarehouse |> List.tryFind (fun c -> c.Name.Equals(consumer))
+            let con =
+                consumersInWarehouse
+                |> List.tryFind (fun c -> c.Name.Equals(consumer))
+
             match con with
             | Some consumer ->
                 let updatedMaterial =
@@ -88,8 +101,15 @@ let private addConsumption
                           |> List.filter (fun material -> not <| material.Equals(mat))
                       Consumers = consumersInWarehouse
                       Consumptions = consumption :: consumptionsInWarehouse }
-            | None -> ConsumptionFailures (ConsumerNotFoundFailure ("Consumer with name \"" + consumer + "\" not found."))
-    | None -> ConsumptionFailures (MaterialNotFoundFailure("Material " + material + " not found."))
+            | None ->
+                ConsumptionFailures(
+                    ConsumerNotFoundFailure(
+                        "Consumer with name \""
+                        + consumer
+                        + "\" not found."
+                    )
+                )
+    | None -> ConsumptionFailures(MaterialNotFoundFailure("Material " + material + " not found."))
 
 let private deleteConsumption
     { Materials = materialsInWarehouse
@@ -117,6 +137,31 @@ let private deleteConsumption
           Consumptions =
               consumptionsInWarehouse
               |> List.filter (fun c -> not <| c.Equals(consumption)) }
+
+
+let private updatePrice
+    { Materials = materialsInWarehouse
+      Consumers = consumersInWarehouse
+      Consumptions = consumptionsInWarehouse }
+    (name, price)
+    =
+    let mat =
+        materialsInWarehouse
+        |> List.tryFind (fun m -> m.Name.Equals(name))
+
+    match mat with
+    | None -> ConsumptionFailures(MaterialNotFoundFailure("Material " + name + " not found."))
+    | Some material ->
+        let updatedMaterial = { material with Price = price }
+
+        Warehouse
+            { Materials =
+                  updatedMaterial :: materialsInWarehouse
+                  |> List.filter (fun mat -> not <| material.Equals(mat))
+              Consumers = consumersInWarehouse
+              Consumptions = consumptionsInWarehouse }
+
+
 
 
 let private emptyWarehosue =
@@ -156,6 +201,7 @@ let warehouseApi: WarehouseApi =
       deleteConsumer = deleteConsumer
       addConsumption = addConsumption
       deleteConsumption = deleteConsumption
+      updatePrice = updatePrice
       empty = emptyWarehosue
       init = initWarehouse }
 
@@ -169,4 +215,5 @@ let update (msg: Message) (model: Warehouse) : OperationResult =
     | DeleteConsumer consumer -> warehouseApi.deleteConsumer model consumer
     | AddConsumption (consumer, material, amount) -> warehouseApi.addConsumption model (consumer, material, amount)
     | DeleteConsumption guid -> warehouseApi.deleteConsumption model guid
+    | UpdatePrice (name, price) -> warehouseApi.updatePrice model (name, price)
     | InitWarehouse -> warehouseApi.init
