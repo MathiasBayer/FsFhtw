@@ -48,6 +48,7 @@ let private evaluateResult (msg: Domain.Message) (oldWarehouse: Warehouse) (resu
                                         | Domain.MaterialNotFoundFailure message -> (oldWarehouse, message)
                                         | Domain.NotEnoughMaterialInStockFailure message -> (oldWarehouse, message)
                                         | Domain.ConsumerNotFoundFailure message -> (oldWarehouse, message)
+                                        | Domain.ConsumptionNotFoundFailure message -> (oldWarehouse, message)
 
 let evaluate (update : Domain.Message -> Warehouse -> Domain.OperationResult) (warehouse : Warehouse) (msg : Message) =
     match msg with

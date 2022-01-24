@@ -1,14 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-      <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>preview</LangVersion>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="Domain.fs" />
-    <Compile Include="WarehouseImplementation.fs" />
-    <Compile Include="Parser.fs" />
-    <Compile Include="Repl.fs" />
-    <Compile Include="Program.fs" />
-  </ItemGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="Domain.fs" />
+        <Compile Include="WarehouseFunctions.fs" />
+        <Compile Include="MaterialFunctions.fs" />
+        <Compile Include="ConsumerFunctions.fs" />
+        <Compile Include="ConsumptionFunctions.fs" />
+        <Compile Include="WarehouseImplementation.fs" />
+        <Compile Include="Parser.fs" />
+        <Compile Include="Repl.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
 </Project>

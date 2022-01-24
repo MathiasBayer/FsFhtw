@@ -39,6 +39,7 @@ type ConsumptionFailures =
     | MaterialNotFoundFailure of string
     | NotEnoughMaterialInStockFailure of string
     | ConsumerNotFoundFailure of string
+    | ConsumptionNotFoundFailure of string
 
 type OperationResult =
     | Warehouse of Warehouse
